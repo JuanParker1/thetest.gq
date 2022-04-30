@@ -1,0 +1,71 @@
+---
+version: '3'
+services:
+  binance-proxy:
+    image: nightshift2k/binance-proxy:latest
+    restart: unless-stopped
+    container_name: binance-proxy
+    hostname: binance-proxy
+    ports:
+      - "8090:8090"
+    command: -v -f
+  ZynatBinanceLive:
+    depends_on:
+      - binance-proxy
+    image: freqtradeorg/freqtrade:stable
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: ZynatBinanceLive
+    hostname: ZynatBinanceLive
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # before enabling this.
+    ports:
+      - "8080:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/ZynatBinanceLive.log
+      --db-url sqlite:////freqtrade/user_data/db/ZynatBinanceLive-tradesv3.sqlite
+      --config /freqtrade/user_data/conf/ZynatBinanceLive.json
+      --config /freqtrade/user_data/blacklist-binance.json
+      --config /freqtrade/user_data/pairlist/pairlist-volume-binance-busd.json
+      --strategy NostalgiaForInfinityX
+  APZyBin01:
+    depends_on:
+      - binance-proxy
+    image: freqtradeorg/freqtrade:stable
+    # image: freqtradeorg/freqtrade:develop
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # Build step - only needed when additional dependencies are needed
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
+    restart: unless-stopped
+    container_name: APZyBin01
+    hostname: APZyBin01
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # before enabling this.
+    ports:
+      - "8081:8080"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/APZyBin01.log
+      --db-url sqlite:////freqtrade/user_data/db/APZyBin01-tradesv1.sqlite
+      --config /freqtrade/user_data/conf/APZyBin01-config.json
+      --config /freqtrade/user_data/blacklist-binance.json
+      --config /freqtrade/user_data/pairlist/pairlist-volume-binance-usdt.json
+      --strategy NostalgiaForInfinityX
